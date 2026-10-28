@@ -1,0 +1,1171 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Controle de voltas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script>
+  try { var temaSalvo = localStorage.getItem('tema'); if (temaSalvo) document.documentElement.setAttribute('data-tema', temaSalvo); } catch (e) {}
+</script>
+<style>
+  :root {
+    --bg: #f5f7fa; --surface: #ffffff; --ink: #111827; --muted: #6b7280;
+    --line: #e5e7eb; --accent: #0f766e; --accent-soft: #e6f4f2; --accent-ink: #ffffff;
+    --alerta: #dc2626; --alerta-soft: #fef2f2; --radius: 10px;
+    --sombra: 0 1px 2px rgba(16,24,40,.05), 0 1px 3px rgba(16,24,40,.06);
+    --sombra-g: 0 12px 32px rgba(16,24,40,.16);
+    --surface-2: #fafbfc; --hover: #f8fafb; --line-soft: #f0f2f5; --aba-bg: #e9edf2;
+    --header-bg: rgba(255,255,255,.85); --botao-hover: #f9fafb; --borda-hover: #d1d5db;
+    --accent-hover: #0b5f58; --foco: rgba(15,118,110,.30); --foco-suave: rgba(15,118,110,.15);
+    --alerta-borda: #fecaca; --alerta-borda-forte: #fca5a5;
+    --linha-atraso: #fff5f5; --linha-urgente: #fffbeb; --selo-bg: #fef3c7; --selo-ink: #92400e;
+    --toast-bg: #111827; --toast-ink: #ffffff;
+    color-scheme: light dark;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-tema="light"]) {
+      --bg: #0f1419; --surface: #171d24; --ink: #e6e9ee; --muted: #9aa4b2;
+      --line: #28313b; --accent: #2dd4bf; --accent-soft: rgba(45,212,191,.14); --accent-ink: #042f2e;
+      --alerta: #f87171; --alerta-soft: rgba(248,113,113,.12);
+      --sombra: 0 1px 2px rgba(0,0,0,.4); --sombra-g: 0 12px 32px rgba(0,0,0,.55);
+      --surface-2: #1b222b; --hover: #1c242d; --line-soft: #1f2730; --aba-bg: #1f2730;
+      --header-bg: rgba(23,29,36,.85); --botao-hover: #1f2730; --borda-hover: #3a4552;
+      --accent-hover: #5eead4; --foco: rgba(45,212,191,.40); --foco-suave: rgba(45,212,191,.20);
+      --alerta-borda: rgba(248,113,113,.40); --alerta-borda-forte: rgba(248,113,113,.60);
+      --linha-atraso: rgba(248,113,113,.10); --linha-urgente: rgba(245,158,11,.10);
+      --selo-bg: rgba(245,158,11,.18); --selo-ink: #fbbf24;
+      --toast-bg: #e6e9ee; --toast-ink: #111827;
+    }
+  }
+  :root[data-tema="dark"] {
+    --bg: #0f1419; --surface: #171d24; --ink: #e6e9ee; --muted: #9aa4b2;
+    --line: #28313b; --accent: #2dd4bf; --accent-soft: rgba(45,212,191,.14); --accent-ink: #042f2e;
+    --alerta: #f87171; --alerta-soft: rgba(248,113,113,.12);
+    --sombra: 0 1px 2px rgba(0,0,0,.4); --sombra-g: 0 12px 32px rgba(0,0,0,.55);
+    --surface-2: #1b222b; --hover: #1c242d; --line-soft: #1f2730; --aba-bg: #1f2730;
+    --header-bg: rgba(23,29,36,.85); --botao-hover: #1f2730; --borda-hover: #3a4552;
+    --accent-hover: #5eead4; --foco: rgba(45,212,191,.40); --foco-suave: rgba(45,212,191,.20);
+    --alerta-borda: rgba(248,113,113,.40); --alerta-borda-forte: rgba(248,113,113,.60);
+    --linha-atraso: rgba(248,113,113,.10); --linha-urgente: rgba(245,158,11,.10);
+    --selo-bg: rgba(245,158,11,.18); --selo-ink: #fbbf24;
+    --toast-bg: #e6e9ee; --toast-ink: #111827;
+  }
+  :root[data-tema="light"] { color-scheme: light; }
+  :root[data-tema="dark"] { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 "Inter", "Segoe UI", system-ui, -apple-system, sans-serif; -webkit-font-smoothing: antialiased; }
+  [hidden] { display: none !important; }
+  button, input, textarea, select { font: inherit; color: inherit; }
+  :focus-visible { outline: 3px solid var(--foco); outline-offset: 1px; }
+
+  .botao { border: 1px solid var(--line); background: var(--surface); padding: 9px 16px; border-radius: var(--radius); cursor: pointer; font-weight: 500; box-shadow: var(--sombra); transition: background .15s, border-color .15s, transform .05s; }
+  .botao:hover { background: var(--botao-hover); border-color: var(--borda-hover); }
+  .botao:active { transform: translateY(1px); }
+  .botao.principal { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .botao.principal:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+  .botao:disabled { opacity: .5; cursor: default; }
+  .link { border: 0; background: none; padding: 0; margin-right: 12px; color: var(--accent); font-weight: 500; cursor: pointer; }
+  .link:hover { text-decoration: underline; }
+
+  #login { max-width: 400px; margin: 12vh auto 0; padding: 32px 28px; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--sombra-g); }
+  #login h1 { font-size: 24px; margin: 0 0 4px; letter-spacing: -.02em; }
+  #login p { margin: 0 0 22px; color: var(--muted); }
+  .campo { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+  .campo label { font-size: 13px; font-weight: 500; color: var(--muted); }
+  .campo input, textarea { padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); transition: border-color .15s, box-shadow .15s; }
+  .campo input:focus, textarea:focus, .campo select:focus, .filtros input:focus, .filtros select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--foco-suave); }
+  .erro { color: var(--alerta); font-size: 14px; min-height: 20px; margin: 0 0 10px; }
+
+  header.topo { position: sticky; top: 0; z-index: 10; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 28px; background: var(--header-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+  header.topo h1 { font-size: 18px; font-weight: 700; letter-spacing: -.02em; margin: 0; }
+  header.topo .acoes { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+  main { max-width: 1700px; margin: 0 auto; padding: 24px 24px 60px; }
+
+  .abas { display: inline-flex; gap: 4px; padding: 4px; background: var(--aba-bg); border-radius: 12px; margin-bottom: 18px; }
+  .aba { border: 0; background: none; padding: 8px 16px; cursor: pointer; color: var(--muted); border-radius: 9px; font-weight: 500; transition: background .15s, color .15s; }
+  .aba:hover { color: var(--ink); }
+  .aba[aria-selected="true"] { background: var(--surface); color: var(--ink); box-shadow: var(--sombra); font-weight: 600; }
+  .contagem { margin-left: 6px; padding: 1px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-size: 12px; font-weight: 600; }
+  .barra { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+
+  .tabela-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--sombra); }
+  table { width: 100%; border-collapse: collapse; min-width: 1040px; }
+  th, td { text-align: left; padding: 12px 10px; border-bottom: 1px solid var(--line-soft); vertical-align: middle; }
+  th { font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); background: var(--surface-2); border-bottom: 1px solid var(--line); }
+  tbody tr { transition: background .12s; }
+  tbody tr:last-child td { border-bottom: 0; }
+  tbody tr:hover { background: var(--hover); }
+  td.centro, th.centro { text-align: center; }
+  .atraso { display: inline-block; color: var(--alerta); background: var(--alerta-soft); padding: 1px 8px; border-radius: 999px; font-weight: 600; margin-left: 6px; font-size: 12px; }
+  .suave { color: var(--muted); }
+  input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; }
+  .vazio { padding: 48px 20px; text-align: center; color: var(--muted); }
+  .prazo { display: inline-flex; align-items: center; gap: 4px; margin: 0 6px; font-size: 13px; cursor: pointer; }
+  .campo .prazo { color: var(--ink); font-size: 14px; margin: 0 14px 0 0; }
+  .campo select { padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+  .perigo { color: var(--alerta); border-color: var(--alerta-borda); margin-right: auto; }
+  .perigo:hover { background: var(--alerta-soft); border-color: var(--alerta-borda-forte); }
+  .filtros { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .filtros input, .filtros select { padding: 8px 12px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); box-shadow: var(--sombra); }
+  .resumo { color: var(--muted); font-size: 13px; }
+  .quem { display: block; font-size: 12px; color: var(--muted); max-width: 130px; margin: 2px auto 0; }
+  tbody td:last-child .link { display: block; margin: 3px 0; white-space: nowrap; }
+
+  dialog { background: var(--surface); border: 0; border-radius: 16px; padding: 0; width: min(720px, 94vw); color: var(--ink); box-shadow: var(--sombra-g); }
+  dialog::backdrop { background: rgba(17,24,39,.5); backdrop-filter: blur(2px); }
+  dialog form, .caixa { padding: 26px 28px 22px; }
+  dialog h2 { margin: 0 0 18px; font-size: 19px; letter-spacing: -.01em; }
+  .linha2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 14px; }
+  .dica { font-size: 13px; color: var(--muted); margin: 4px 0 0; }
+  .rodape { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; flex-wrap: wrap; }
+  textarea { width: 100%; min-height: 220px; resize: vertical; line-height: 1.5; }
+  .pax-linha { display: grid; grid-template-columns: 1fr 140px 160px auto; gap: 8px; margin-bottom: 8px; align-items: center; }
+  .pax-linha input { min-width: 0; padding: 9px 10px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+  .pax-linha input.invalido { border-color: var(--alerta); box-shadow: 0 0 0 3px var(--alerta-soft); }
+  .pax-linha .link { margin: 0; padding: 4px 8px; color: var(--alerta); font-size: 16px; }
+  #btn-add-pax { align-self: flex-start; }
+  #alarme { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); z-index: 100; width: min(520px, 92vw); padding: 16px 20px; background: var(--surface); border: 2px solid var(--alerta); border-radius: 14px; box-shadow: var(--sombra-g); animation: pulsa 1s ease-in-out infinite alternate; }
+  #alarme h2 { margin: 0 0 8px; font-size: 18px; color: var(--alerta); }
+  #alarme ul { margin: 0 0 14px; padding-left: 18px; }
+  #alarme li { margin: 3px 0; }
+  @keyframes pulsa { from { box-shadow: 0 0 0 0 rgba(220,38,38,.45); } to { box-shadow: 0 0 0 10px rgba(220,38,38,0); } }
+  #btn-alarme.ativo { color: var(--accent); border-color: var(--accent); }
+  #btn-alarme.pendente { color: var(--alerta); border-color: var(--alerta); animation: pulsa 1s ease-in-out infinite alternate; }
+  @media (max-width: 700px) {
+    .pax-linha { grid-template-columns: 1fr 1fr; }
+    .pax-linha .pax-nome { grid-column: 1 / -1; }
+  }
+
+  #aviso { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--toast-bg); color: var(--toast-ink); padding: 11px 18px; border-radius: 12px; box-shadow: var(--sombra-g); max-width: 90vw; }
+  #aviso.erro-msg { background: #dc2626; color: #fff; }
+
+  /* Urgência por linha */
+  tbody tr.u-atrasado { background: var(--linha-atraso); }
+  tbody tr.u-atrasado td:first-child { box-shadow: inset 4px 0 0 var(--alerta); }
+  tbody tr.u-urgente { background: var(--linha-urgente); }
+  tbody tr.u-urgente td:first-child { box-shadow: inset 4px 0 0 #f59e0b; }
+  tbody tr.u-solicitado td:first-child { box-shadow: inset 4px 0 0 #60a5fa; }
+  tbody tr.u-feito { opacity: .55; }
+  tbody tr.u-feito:hover { opacity: 1; }
+  .selo { display: inline-block; padding: 1px 8px; border-radius: 999px; font-weight: 600; margin-left: 6px; font-size: 12px; }
+  .selo.amarelo { color: var(--selo-ink); background: var(--selo-bg); }
+
+  /* Cartões de resumo */
+  .cartoes { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 18px; }
+  .cartao { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; box-shadow: var(--sombra); }
+  .cartao .rotulo { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+  .cartao .valor { font-size: 26px; font-weight: 700; letter-spacing: -.02em; margin-top: 4px; }
+  .cartao .detalhe { font-size: 13px; color: var(--muted); margin-top: 2px; }
+  .cartao.alerta { border-color: var(--alerta-borda); background: var(--alerta-soft); }
+  .cartao.alerta .valor { color: var(--alerta); }
+
+  @media (max-width: 700px) {
+    header.topo, main { padding-left: 16px; padding-right: 16px; }
+    .linha2 { grid-template-columns: 1fr; }
+  }
+
+</style>
+</head>
+<body>
+
+<section id="login">
+  <h1>Controle de voltas</h1>
+  <p>Entre com o e-mail e a senha da equipe.</p>
+  <form id="form-login">
+    <div class="campo"><label for="email">E-mail</label><input id="email" name="email" type="email" required autocomplete="username"></div>
+    <div class="campo"><label for="senha">Senha</label><input id="senha" name="senha" type="password" required autocomplete="current-password"></div>
+    <p class="erro" id="erro-login" role="alert"></p>
+    <button class="botao principal" type="submit">Entrar</button>
+  </form>
+</section>
+
+<div id="app" hidden>
+  <header class="topo">
+    <h1>Controle de voltas</h1>
+    <div class="acoes">
+      <button class="botao principal" id="btn-novo" type="button">Novo pedido</button>
+      <button class="botao" id="btn-alarme" type="button">🔔 Ativar alarme</button>
+      <button class="botao" id="btn-tema" type="button">🌙 Tema escuro</button>
+      <button class="botao" id="btn-sair" type="button">Sair</button>
+    </div>
+  </header>
+
+  <div id="alarme" role="alertdialog" aria-live="assertive" aria-labelledby="alarme-titulo" hidden>
+    <h2 id="alarme-titulo"></h2>
+    <ul id="alarme-lista"></ul>
+    <button class="botao principal" type="button" id="btn-entendi">Entendi</button>
+  </div>
+
+  <main>
+    <div class="cartoes" id="cartoes"></div>
+    <div class="abas" role="tablist">
+      <button class="aba" role="tab" id="aba-hoje" aria-selected="true">Voltas de hoje<span class="contagem" id="cont-hoje">0</span></button>
+      <button class="aba" role="tab" id="aba-entrega" aria-selected="false">Aguardando entrega<span class="contagem" id="cont-entrega">0</span></button>
+      <button class="aba" role="tab" id="aba-todas" aria-selected="false">Todas as voltas</button>
+      <button class="aba" role="tab" id="aba-final" aria-selected="false">Finalizadas</button>
+    </div>
+    <div class="barra">
+      <div class="filtros">
+        <input id="busca" type="search" placeholder="Buscar cliente, trecho ou data de entrega (ex: 25/10)" aria-label="Buscar">
+        <select id="f-agencia" aria-label="Filtrar por agência"></select>
+        <select id="f-emissor" aria-label="Filtrar por emissor">
+          <option value="">Todos os emissores</option>
+          <option value="Lucas">Lucas</option>
+          <option value="Speed">Speed</option>
+          <option value="__sem">Sem emissor</option>
+        </select>
+        <span class="resumo" id="resumo"></span>
+      </div>
+      <button class="botao principal" id="btn-zap" type="button" disabled>Texto para WhatsApp (0)</button>
+    </div>
+    <div class="tabela-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th class="centro"><input type="checkbox" id="sel-todos" aria-label="Selecionar todos os pendentes"></th>
+            <th>Agência</th><th>Cliente</th><th>Trecho</th><th class="centro">Pass.</th><th>Data da volta</th><th>Entrega</th><th>Passaporte</th><th>Documento</th>
+            <th class="centro">Solicitado</th><th class="centro">Emissor</th><th class="centro">Entregue</th><th class="centro">Prazo</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="corpo"></tbody>
+      </table>
+      <div class="vazio" id="vazio" hidden></div>
+    </div>
+  </main>
+
+  <dialog id="dlg-novo">
+    <form id="form-novo">
+      <h2 id="titulo-form">Novo pedido de volta</h2>
+      <div class="linha2">
+        <div class="campo"><label for="n-agencia">Agência</label><select id="n-agencia" name="agencia" required></select></div>
+        <div class="campo"><label for="n-cliente">Nome do cliente</label><input id="n-cliente" name="cliente" required></div>
+      </div>
+      <div class="campo"><label for="n-trecho">Trecho</label><input id="n-trecho" name="trecho" placeholder="LIS-GRU" required></div>
+      <div class="linha2">
+        <div class="campo"><label for="n-solicitacao">Data do pedido</label><input id="n-solicitacao" name="solicitacao" type="date" required></div>
+        <div class="campo"><label for="n-volta">Data da volta</label><input id="n-volta" name="volta" type="date" required></div>
+      </div>
+      <div class="linha2">
+        <div class="campo"><label for="n-entrega">Data de entrega do bilhete</label><input id="n-entrega" name="entrega" type="date" required></div>
+        <div class="campo"><label for="n-hora">Hora de entrega</label><input id="n-hora" name="hora" type="time"></div>
+      </div>
+      <div class="campo"><label for="n-qtd">Passageiros (CPFs)</label><input id="n-qtd" name="qtd" type="number" min="1" value="1" required></div>
+      <div class="campo">
+        <label>Prazo da volta</label>
+        <div><label class="prazo"><input type="checkbox" name="prazo24"> 24h</label><label class="prazo"><input type="checkbox" name="prazo48"> 48h</label></div>
+      </div>
+      <div class="campo">
+        <label for="n-arquivos">Passaportes</label>
+        <input id="n-arquivos" name="passaportes" type="file" accept=".pdf,image/*" multiple>
+        <div id="lista-arquivos"></div>
+        <p class="dica" id="dica-arquivos"></p>
+      </div>
+      <div class="campo">
+        <label for="n-doc">Documento final (já editado)</label>
+        <input id="n-doc" name="doc" type="file" accept=".pdf,image/*">
+        <div id="doc-atual"></div>
+        <p class="dica">Opcional. Um arquivo só por pedido, guardado para enviar ao cliente na hora da entrega.</p>
+      </div>
+      <div class="campo">
+        <label>Passageiros (nome, CPF e data de nascimento)</label>
+        <div id="lista-pax"></div>
+        <button class="botao" type="button" id="btn-add-pax">+ Adicionar passageiro</button>
+        <p class="dica">Opcional. Saem no final da mensagem do WhatsApp quando você copia um pedido.</p>
+      </div>
+      <p class="erro" id="erro-novo" role="alert"></p>
+      <div class="rodape">
+        <button class="botao perigo" type="button" id="btn-excluir" hidden>Excluir pedido</button>
+        <button class="botao" type="button" id="btn-cancelar">Cancelar</button>
+        <button class="botao principal" type="submit" id="btn-salvar">Salvar pedido</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="dlg-zap">
+    <div class="caixa">
+      <h2>Texto para o WhatsApp</h2>
+      <textarea id="zap-texto" aria-label="Texto da solicitação"></textarea>
+      <p class="dica">Você pode ajustar o texto antes de copiar. Os passaportes continuam sendo anexados à parte.</p>
+      <p class="erro" id="zap-erro" role="alert"></p>
+      <div class="rodape">
+        <button class="botao" type="button" id="zap-fechar">Fechar</button>
+        <button class="botao" type="button" id="zap-marcar">Marcar como solicitados</button>
+        <button class="botao principal" type="button" id="zap-copiar">Copiar texto</button>
+      </div>
+    </div>
+  </dialog>
+</div>
+
+<div id="aviso" role="status" hidden></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="config.js"></script>
+<script>
+  const $ = (s) => document.querySelector(s);
+  const estado = { aba: 'hoje', linhas: [], sel: new Set(), editando: null, agencias: [], usuario: '', pax: {}, paxOk: false, alertas: [], alertados: new Set(), alarmeAtivo: false, pendHoje: 0 };
+
+  function criar(tag, attrs = {}, ...filhos) {
+    const e = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs)) {
+      if (k === 'class') e.className = v;
+      else e.setAttribute(k, v);
+    }
+    filhos.flat().filter((f) => f != null && f !== false).forEach((f) => e.append(f));
+    return e;
+  }
+
+  // Data local no formato AAAA-MM-DD (sem cair no fuso UTC)
+  function hoje() {
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+  const formatar = (d) => (d ? d.split('-').reverse().join('/') : '-');
+
+  // CPF: máscara e validação
+  const formatarCpf = (v) => String(v).replace(/\D/g, '').slice(0, 11)
+    .replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+  function cpfValido(valor) {
+    const c = String(valor).replace(/\D/g, '');
+    if (c.length !== 11 || /^(\d)\1{10}$/.test(c)) return false;
+    for (let t = 9; t < 11; t++) {
+      let soma = 0;
+      for (let i = 0; i < t; i++) soma += Number(c[i]) * (t + 1 - i);
+      if (((soma * 10) % 11) % 10 !== Number(c[t])) return false;
+    }
+    return true;
+  }
+
+  // Urgência: 'feito' | 'atrasado' | 'urgente' (hoje, sem hora ou em até 3h) | 'normal'
+  function urgencia(r, h) {
+    if (r.ENTREGUE) return { nivel: 'feito' };
+    if (r.SOLICITADO) return { nivel: 'solicitado' };
+    if (!r.DATA_DA_ENTREGA) return { nivel: 'normal' };
+    if (r.DATA_DA_ENTREGA < h) return { nivel: 'atrasado' };
+    if (r.DATA_DA_ENTREGA > h) return { nivel: 'normal' };
+    if (!r.HORA_DA_ENTREGA) return { nivel: 'urgente', texto: 'hoje' };
+    const agora = new Date();
+    const [hh, mm] = r.HORA_DA_ENTREGA.split(':').map(Number);
+    const falta = hh * 60 + mm - (agora.getHours() * 60 + agora.getMinutes());
+    if (falta < 0) return { nivel: 'atrasado' };
+    if (falta <= 180) return { nivel: 'urgente', texto: falta < 60 ? 'em ' + falta + 'min' : 'em ' + Math.ceil(falta / 60) + 'h' };
+    return { nivel: 'normal' };
+  }
+  const arquivosDe = (r) => (r.ARMAZENAGEM_PASSAPORTE ? r.ARMAZENAGEM_PASSAPORTE.split('|') : []);
+  const semAcento = (t) => (t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
+  let tempoAviso;
+  function aviso(texto, erro = false) {
+    const a = $('#aviso');
+    a.textContent = texto;
+    a.className = erro ? 'erro-msg' : '';
+    a.hidden = false;
+    clearTimeout(tempoAviso);
+    tempoAviso = setTimeout(() => (a.hidden = true), 4500);
+  }
+
+  const semConfig = typeof SUPABASE_URL === 'undefined' || SUPABASE_URL.startsWith('COLE') || SUPABASE_ANON_KEY.startsWith('COLE');
+  if (semConfig) {
+    $('#erro-login').textContent = 'Falta preencher a URL e a chave no arquivo config.js (na mesma pasta do index.html).';
+  } else {
+    iniciar();
+  }
+
+  function iniciar() {
+    const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // Lista de agências: as que já existem nos pedidos + (opcional) AGENCIAS do config.js
+    function montarAgencias() {
+      const todas = new Set((typeof AGENCIAS !== 'undefined' ? AGENCIAS : []).map((a) => a.trim().toUpperCase()));
+      estado.linhas.forEach((r) => r.AGENCIA && todas.add(r.AGENCIA.trim().toUpperCase()));
+      estado.agencias = [...todas].sort();
+      const f = $('#f-agencia');
+      const atual = f.value;
+      f.replaceChildren(criar('option', { value: '' }, 'Todas as agências'), ...estado.agencias.map((a) => criar('option', { value: a }, a)));
+      f.value = estado.agencias.includes(atual) ? atual : '';
+    }
+
+    function preencherAgencias(escolhida) {
+      const s = $('#n-agencia');
+      s.replaceChildren(
+        criar('option', { value: '' }, 'Escolha a agência'),
+        ...estado.agencias.map((a) => criar('option', { value: a }, a)),
+        criar('option', { value: '__nova__' }, '+ Nova agência...')
+      );
+      s.value = escolhida || '';
+    }
+
+    async function carregar(silencioso = false) {
+      const [{ data, error }, rp] = await Promise.all([
+        db.from(TABELA).select('*').order('DATA_DA_ENTREGA', { ascending: true }).order('HORA_DA_ENTREGA', { ascending: true }).order('id'),
+        db.from('passageiros').select('*').order('id')
+      ]);
+      if (error) { if (!silencioso) aviso('Não foi possível carregar os pedidos: ' + error.message, true); return; }
+      estado.pax = {};
+      estado.paxOk = !rp.error;
+      if (!rp.error) rp.data.forEach((p) => { (estado.pax[p.pedido_id] = estado.pax[p.pedido_id] || []).push(p); });
+      estado.linhas = data;
+      montarAgencias();
+      const pendentes = new Set(data.filter((r) => !r.SOLICITADO).map((r) => r.id));
+      estado.sel = new Set([...estado.sel].filter((id) => pendentes.has(id)));
+      desenhar();
+    }
+
+    // Para mostrar só as entregas de hoje, troque "<=" por "===" na linha com "doDia".
+    function listaAtual() {
+      const h = hoje();
+      const doDia = estado.linhas.filter((r) => !r.SOLICITADO && r.DATA_DA_ENTREGA && r.DATA_DA_ENTREGA <= h);
+      $('#cont-hoje').textContent = doDia.length;
+      const aguardando = estado.linhas.filter((r) => r.SOLICITADO && !r.ENTREGUE);
+      $('#cont-entrega').textContent = aguardando.length;
+      const termo = semAcento($('#busca').value.trim());
+      const ag = $('#f-agencia').value;
+      const em = $('#f-emissor').value;
+      const base = estado.aba === 'hoje' ? doDia
+        : estado.aba === 'entrega' ? aguardando
+        : estado.aba === 'final' ? estado.linhas.filter((r) => r.ENTREGUE).reverse()
+        : estado.linhas.filter((r) => !r.ENTREGUE);
+      return base.filter((r) =>
+        (!ag || (r.AGENCIA || '').trim().toUpperCase() === ag) &&
+        (!em || (em === '__sem' ? !r.EMISSOR : r.EMISSOR === em)) &&
+        (!termo || semAcento(r.NOME_CLIENTE + ' ' + r.TRECHO + ' ' + formatar(r.DATA_DA_ENTREGA)).includes(termo)));
+    }
+
+    function desenharCartoes() {
+      const h = hoje();
+      const pend = estado.linhas.filter((r) => !r.SOLICITADO && r.DATA_DA_ENTREGA && r.DATA_DA_ENTREGA <= h);
+      estado.pendHoje = pend.length;
+      atualizarTitulo();
+      const pass = pend.reduce((t, r) => t + (r.QTD_PASSAGEIROS || 1), 0);
+      const atrasadas = pend.filter((r) => urgencia(r, h).nivel === 'atrasado').length;
+      const agora = new Date();
+      const agoraTxt = String(agora.getHours()).padStart(2, '0') + ':' + String(agora.getMinutes()).padStart(2, '0');
+      const proxima = estado.linhas
+        .filter((r) => !r.ENTREGUE && r.DATA_DA_ENTREGA === h && r.HORA_DA_ENTREGA && r.HORA_DA_ENTREGA.slice(0, 5) >= agoraTxt)
+        .sort((a, b) => a.HORA_DA_ENTREGA.localeCompare(b.HORA_DA_ENTREGA))[0];
+      const aguardando = estado.linhas.filter((r) => r.SOLICITADO && !r.ENTREGUE).length;
+
+      const cartao = (classe, rotulo, valor, detalhe) =>
+        criar('div', { class: 'cartao ' + classe },
+          criar('div', { class: 'rotulo' }, rotulo),
+          criar('div', { class: 'valor' }, valor),
+          criar('div', { class: 'detalhe' }, detalhe));
+
+      $('#cartoes').replaceChildren(
+        cartao('', 'Para solicitar hoje', String(pend.length), pass + ' passageiro(s)'),
+        cartao(atrasadas ? 'alerta' : '', 'Atrasadas', String(atrasadas), atrasadas ? 'precisam de atenção agora' : 'tudo em dia'),
+        cartao('', 'Aguardando entrega', String(aguardando), 'solicitadas, ainda não entregues'),
+        cartao('', 'Próxima entrega', proxima ? proxima.HORA_DA_ENTREGA.slice(0, 5) : '—', proxima ? proxima.NOME_CLIENTE : 'nenhuma com hora hoje')
+      );
+    }
+
+    function desenhar() {
+      const h = hoje();
+      desenharCartoes();
+      const lista = listaAtual();
+      const pass = lista.reduce((t, r) => t + (r.QTD_PASSAGEIROS || 1), 0);
+      $('#resumo').textContent = lista.length + ' pedido(s), ' + pass + ' passageiro(s)';
+      const corpo = $('#corpo');
+      corpo.replaceChildren();
+      lista.forEach((r) => corpo.append(linha(r, h)));
+
+      const pend = lista.filter((r) => !r.SOLICITADO);
+      $('#sel-todos').checked = pend.length > 0 && pend.every((r) => estado.sel.has(r.id));
+      $('#sel-todos').disabled = pend.length === 0;
+
+      const vazio = $('#vazio');
+      vazio.hidden = lista.length > 0;
+      vazio.textContent = estado.aba === 'hoje'
+        ? 'Nenhuma volta para solicitar hoje.'
+        : estado.aba === 'entrega'
+          ? 'Nenhuma volta aguardando entrega.'
+          : estado.aba === 'final'
+            ? 'Nenhuma volta finalizada ainda.'
+            : 'Nenhuma volta ativa. Use Novo pedido para começar.';
+      atualizarZap();
+    }
+
+    // ===== Tema claro/escuro =====
+    function temaAtual() {
+      return document.documentElement.getAttribute('data-tema')
+        || (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    }
+    function desenharBotaoTema() {
+      $('#btn-tema').textContent = temaAtual() === 'dark' ? '☀️ Tema claro' : '🌙 Tema escuro';
+    }
+    $('#btn-tema').addEventListener('click', () => {
+      const novo = temaAtual() === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-tema', novo);
+      try { localStorage.setItem('tema', novo); } catch (e) { /* vale só nesta visita */ }
+      desenharBotaoTema();
+    });
+    if (window.matchMedia) {
+      const mq = matchMedia('(prefers-color-scheme: dark)');
+      if (mq.addEventListener) mq.addEventListener('change', desenharBotaoTema);
+    }
+    desenharBotaoTema();
+
+    // ===== Alarme: 5 min antes de cada entrega + lembrete das 8:30 =====
+    let audioCtx = null;
+    let timerSom = null;
+
+    function bip(freq, atraso) {
+      const t = audioCtx.currentTime + atraso;
+      const osc = audioCtx.createOscillator();
+      const ganho = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      ganho.gain.setValueAtTime(0.0001, t);
+      ganho.gain.exponentialRampToValueAtTime(0.4, t + 0.02);
+      ganho.gain.exponentialRampToValueAtTime(0.0001, t + 0.35);
+      osc.connect(ganho);
+      ganho.connect(audioCtx.destination);
+      osc.start(t);
+      osc.stop(t + 0.4);
+    }
+    function campainha() { bip(880, 0); bip(660, 0.4); }
+    function iniciarSom() {
+      if (timerSom || !audioCtx) return;
+      campainha();
+      timerSom = setInterval(campainha, 2000);
+    }
+    function pararSom() { clearInterval(timerSom); timerSom = null; }
+
+    function atualizarTitulo() {
+      document.title = estado.alertas.length
+        ? '🔔 ' + estado.alertas[0].titulo + ' - Controle de voltas'
+        : (estado.pendHoje ? '(' + estado.pendHoje + ') ' : '') + 'Controle de voltas';
+    }
+
+    function desenharAlarme() {
+      const lista = estado.alertas;
+      $('#alarme').hidden = !lista.length;
+      $('#alarme-titulo').textContent = lista.length === 1 ? lista[0].titulo : lista.length + ' avisos';
+      $('#alarme-lista').replaceChildren(...lista.map((a) => criar('li', {}, lista.length > 1 ? a.titulo + ': ' + a.texto : a.texto)));
+      atualizarTitulo();
+    }
+
+    function jaAlertou(chave) {
+      if (estado.alertados.has(chave)) return true;
+      try { return JSON.parse(localStorage.getItem('alertados:' + hoje()) || '[]').includes(chave); } catch (e) { return false; }
+    }
+    function registrarAlerta(chave) {
+      estado.alertados.add(chave);
+      try {
+        const dia = hoje();
+        Object.keys(localStorage).filter((k) => k.startsWith('alertados:') && k !== 'alertados:' + dia).forEach((k) => localStorage.removeItem(k));
+        localStorage.setItem('alertados:' + dia, JSON.stringify([...estado.alertados].filter((k) => k.includes(dia))));
+      } catch (e) { /* sem armazenamento: vale só nesta sessão */ }
+    }
+
+    function alertar(a) {
+      estado.alertas.push(a);
+      desenharAlarme();
+      iniciarSom();
+      if ('Notification' in window && Notification.permission === 'granted') {
+        try { new Notification(a.titulo, { body: a.texto, requireInteraction: true, tag: a.chave }); } catch (e) { /* segue só com som e aviso na tela */ }
+      }
+    }
+
+    function verificarAlarmes() {
+      if (!estado.alarmeAtivo || $('#app').hidden) return;
+      const h = hoje();
+      const agora = new Date();
+      const minAgora = agora.getHours() * 60 + agora.getMinutes();
+
+      // Volta que já foi entregue sai do aviso
+      const antes = estado.alertas.length;
+      estado.alertas = estado.alertas.filter((a) => a.tipo !== 'entrega' || estado.linhas.some((r) => r.id === a.id && !r.ENTREGUE));
+      if (estado.alertas.length !== antes) {
+        desenharAlarme();
+        if (!estado.alertas.length) pararSom();
+      }
+
+      // 5 minutos antes de cada entrega que ainda não foi feita
+      estado.linhas.filter((r) => !r.ENTREGUE && r.DATA_DA_ENTREGA === h && r.HORA_DA_ENTREGA).forEach((r) => {
+        const [hh, mm] = r.HORA_DA_ENTREGA.split(':').map(Number);
+        const falta = hh * 60 + mm - minAgora;
+        if (falta < 0 || falta > 5) return;
+        const chave = 'entrega|' + r.id + '|' + h + '|' + r.HORA_DA_ENTREGA;
+        if (jaAlertou(chave)) return;
+        registrarAlerta(chave);
+        alertar({
+          chave, tipo: 'entrega', id: r.id,
+          titulo: falta === 0 ? 'Entrega agora' : 'Entrega em ' + falta + ' min',
+          texto: r.NOME_CLIENTE + ' - ' + r.HORA_DA_ENTREGA.slice(0, 5) + (r.TRECHO ? ' - ' + r.TRECHO : '')
+        });
+      });
+
+      // Lembrete das 8:30 (vale de 8:30 até 8:35)
+      if (minAgora >= 8 * 60 + 30 && minAgora <= 8 * 60 + 35) {
+        const chave = 'lembrete|' + h;
+        const pend = estado.linhas.filter((r) => !r.SOLICITADO && r.DATA_DA_ENTREGA && r.DATA_DA_ENTREGA <= h);
+        if (pend.length && !jaAlertou(chave)) {
+          registrarAlerta(chave);
+          const pass = pend.reduce((t, r) => t + (r.QTD_PASSAGEIROS || 1), 0);
+          alertar({ chave, tipo: 'lembrete', titulo: 'Voltas para solicitar hoje', texto: pend.length + ' volta(s), ' + pass + ' passageiro(s)' });
+        }
+      }
+    }
+
+    // Lembra se a pessoa deixou o alarme ligado (liga sozinho no primeiro clique da próxima visita)
+    function querAlarme() {
+      try { return localStorage.getItem('alarme-preferido') === '1'; } catch (e) { return false; }
+    }
+    function guardarPreferencia(ligado) {
+      try { localStorage.setItem('alarme-preferido', ligado ? '1' : '0'); } catch (e) { /* sem armazenamento: vale só nesta visita */ }
+    }
+
+    function desenharBotaoAlarme() {
+      const b = $('#btn-alarme');
+      const ativo = estado.alarmeAtivo;
+      const pendente = !ativo && querAlarme();
+      b.textContent = ativo ? '🔔 Alarme ativo' : pendente ? '🔕 Alarme desligado' : '🔔 Ativar alarme';
+      b.title = pendente ? 'Liga sozinho no próximo clique na página' : '';
+      b.classList.toggle('ativo', ativo);
+      b.classList.toggle('pendente', pendente);
+    }
+
+    async function ligarAlarme(manual) {
+      try {
+        audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+        await Promise.race([audioCtx.resume(), new Promise((ok) => setTimeout(ok, 800))]);
+        if (audioCtx.state !== 'running') throw new Error('som bloqueado');
+        if (manual) campainha();
+      } catch (e) {
+        if (manual) aviso('Não foi possível ativar o som neste navegador.', true);
+        return false;
+      }
+      if (manual && 'Notification' in window && Notification.permission === 'default') {
+        try { await Notification.requestPermission(); } catch (e) { /* segue sem balão */ }
+      }
+      estado.alarmeAtivo = true;
+      guardarPreferencia(true);
+      desenharBotaoAlarme();
+      verificarAlarmes();
+      return true;
+    }
+
+    $('#btn-alarme').addEventListener('click', async () => {
+      if (estado.alarmeAtivo) {
+        estado.alarmeAtivo = false;
+        estado.alertas = [];
+        guardarPreferencia(false);
+        pararSom();
+        desenharAlarme();
+        desenharBotaoAlarme();
+        return;
+      }
+      await ligarAlarme(true);
+    });
+
+    // O navegador só libera o som depois de um clique ou tecla: o primeiro toque na página religa o alarme
+    let religando = false;
+    function religarNoPrimeiroToque(e) {
+      if (estado.alarmeAtivo || religando || !querAlarme()) return;
+      if (e.target && e.target.closest && e.target.closest('#btn-alarme')) return;
+      religando = true;
+      ligarAlarme(false).finally(() => { religando = false; });
+    }
+    document.addEventListener('click', religarNoPrimeiroToque);
+    document.addEventListener('keydown', religarNoPrimeiroToque);
+    desenharBotaoAlarme();
+    $('#btn-entendi').addEventListener('click', () => {
+      estado.alertas = [];
+      pararSom();
+      desenharAlarme();
+    });
+    setInterval(verificarAlarmes, 15000);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) verificarAlarmes(); });
+
+    // Atualiza os pedidos sozinho: a cada minuto e quando a pessoa volta para esta aba
+    function atualizarSozinho() {
+      if ($('#app').hidden || document.hidden) return;
+      if (document.querySelector('dialog[open]')) { desenhar(); return; }
+      carregar(true);
+    }
+    setInterval(atualizarSozinho, 60000);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) atualizarSozinho(); });
+
+    function atualizarZap() {
+      const n = estado.sel.size;
+      $('#btn-zap').textContent = 'Texto para WhatsApp (' + n + ')';
+      $('#btn-zap').disabled = n === 0;
+    }
+
+    function linha(r, h) {
+      const urg = urgencia(r, h);
+      const atrasado = urg.nivel === 'atrasado';
+      const arquivos = arquivosDe(r);
+
+      let marcar = null;
+      if (!r.SOLICITADO) {
+        marcar = criar('input', { type: 'checkbox', 'aria-label': 'Selecionar pedido de ' + r.NOME_CLIENTE });
+        marcar.checked = estado.sel.has(r.id);
+        marcar.addEventListener('change', () => {
+          if (marcar.checked) estado.sel.add(r.id); else estado.sel.delete(r.id);
+          desenhar();
+        });
+      }
+
+      const passaporte = arquivos.length
+        ? arquivos.map((caminho, i) => {
+            const b = criar('button', { class: 'link', type: 'button' }, arquivos.length > 1 ? 'Passaporte ' + (i + 1) : 'Baixar');
+            b.addEventListener('click', () => baixar(caminho));
+            return b;
+          })
+        : criar('span', { class: 'suave' }, 'Sem arquivo');
+
+      const documento = r.DOCUMENTO_FINAL
+        ? criar('button', { class: 'link', type: 'button' }, 'Baixar')
+        : criar('span', { class: 'suave' }, '—');
+      if (r.DOCUMENTO_FINAL) documento.addEventListener('click', () => baixar(r.DOCUMENTO_FINAL));
+
+      const cb = criar('input', { type: 'checkbox', 'aria-label': 'Marcar como solicitado' });
+      cb.checked = !!r.SOLICITADO;
+      cb.addEventListener('change', () => alternar(r.id, cb.checked));
+      const quem = r.SOLICITADO && r.SOLICITADO_POR
+        ? criar('span', { class: 'quem' }, 'por ' + r.SOLICITADO_POR + (r.SOLICITADO_EM
+            ? ', ' + new Date(r.SOLICITADO_EM).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+            : ''))
+        : null;
+
+      // Emissor: um só por volta; só libera depois de "solicitado"
+      const emissores = ['Lucas', 'Speed'].map((nome) => {
+        const c = criar('input', { type: 'checkbox', 'aria-label': 'Emissor ' + nome });
+        c.checked = r.EMISSOR === nome;
+        c.disabled = !r.SOLICITADO;
+        c.title = r.SOLICITADO ? '' : 'Marque como solicitado primeiro';
+        c.addEventListener('change', () => definirEmissor(r.id, c.checked ? nome : null));
+        return criar('label', { class: 'prazo' }, c, nome);
+      });
+
+      const ce = criar('input', { type: 'checkbox', 'aria-label': 'Marcar como entregue' });
+      ce.checked = !!r.ENTREGUE;
+      ce.disabled = !r.SOLICITADO;
+      ce.title = r.SOLICITADO ? '' : 'Marque como solicitado primeiro';
+      ce.addEventListener('change', () => entregar(r.id, ce.checked));
+      const quemEntrega = r.ENTREGUE && r.ENTREGUE_POR
+        ? criar('span', { class: 'quem' }, 'por ' + r.ENTREGUE_POR + (r.ENTREGUE_EM
+            ? ', ' + new Date(r.ENTREGUE_EM).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+            : ''))
+        : null;
+
+      const prazo = [24, 48].map((horas) => {
+        const c = criar('input', { type: 'checkbox', 'aria-label': 'Prazo de ' + horas + ' horas' });
+        c.checked = r.PRAZO_HORAS === horas;
+        c.addEventListener('change', () => definirPrazo(r.id, c.checked ? horas : null));
+        return criar('label', { class: 'prazo' }, c, horas + 'h');
+      });
+
+      const editar = criar('button', { class: 'link', type: 'button' }, 'Editar');
+      editar.addEventListener('click', () => abrirForm(r));
+      const copiar = criar('button', { class: 'link', type: 'button' }, 'Copiar texto');
+      copiar.addEventListener('click', () => copiarTexto(textoZap([r]), 'Texto do pedido copiado.'));
+      const seletorDoc = criar('input', { type: 'file', accept: '.pdf,image/*', hidden: '' });
+      seletorDoc.addEventListener('change', () => anexarDocumento(r, seletorDoc.files[0]));
+      const anexarDoc = criar('button', { class: 'link', type: 'button' }, r.DOCUMENTO_FINAL ? 'Trocar documento' : 'Anexar documento');
+      anexarDoc.addEventListener('click', () => seletorDoc.click());
+      const baixarDoc = r.DOCUMENTO_FINAL ? criar('button', { class: 'link', type: 'button' }, 'Baixar documento') : null;
+      if (baixarDoc) baixarDoc.addEventListener('click', () => baixar(r.DOCUMENTO_FINAL));
+
+      return criar('tr', { class: 'u-' + urg.nivel },
+        criar('td', { class: 'centro' }, marcar),
+        criar('td', {}, r.AGENCIA),
+        criar('td', {}, r.NOME_CLIENTE),
+        criar('td', {}, r.TRECHO),
+        criar('td', { class: 'centro' }, String(r.QTD_PASSAGEIROS || 1)),
+        criar('td', {}, formatar(r.DATA_DA_VOLTA)),
+        criar('td', {}, formatar(r.DATA_DA_ENTREGA) + (r.HORA_DA_ENTREGA ? ' ' + r.HORA_DA_ENTREGA.slice(0, 5) : ''), atrasado ? criar('span', { class: 'atraso' }, 'atrasado') : null, urg.nivel === 'urgente' ? criar('span', { class: 'selo amarelo' }, urg.texto) : null),
+        criar('td', {}, passaporte),
+        criar('td', {}, documento),
+        criar('td', { class: 'centro' }, cb, quem),
+        criar('td', { class: 'centro' }, ...emissores),
+        criar('td', { class: 'centro' }, ce, quemEntrega),
+        criar('td', { class: 'centro' }, prazo),
+        criar('td', {}, editar, copiar, anexarDoc, baixarDoc, seletorDoc)
+      );
+    }
+
+    const registro = (v) => ({ SOLICITADO_POR: v ? estado.usuario : null, SOLICITADO_EM: v ? new Date().toISOString() : null });
+
+    const registroEntrega = (v) => ({ ENTREGUE_POR: v ? estado.usuario : null, ENTREGUE_EM: v ? new Date().toISOString() : null });
+
+    async function entregar(id, valor) {
+      const { error } = await db.from(TABELA).update({ ENTREGUE: valor, ...registroEntrega(valor) }).eq('id', id);
+      if (error) aviso('Não foi possível atualizar: ' + error.message, true);
+      else aviso(valor ? 'Volta marcada como entregue.' : 'Volta voltou para aguardando entrega.');
+      carregar();
+    }
+
+    async function definirEmissor(id, nome) {
+      const { error } = await db.from(TABELA).update({ EMISSOR: nome }).eq('id', id);
+      if (error) aviso('Não foi possível atualizar: ' + error.message, true);
+      else aviso(nome ? 'Emissor: ' + nome + '.' : 'Emissor removido.');
+      carregar();
+    }
+
+    async function alternar(id, valor) {
+      // Desmarcar "solicitado" também desfaz "entregue" e o emissor
+      const extra = valor ? {} : { ENTREGUE: false, ...registroEntrega(false), EMISSOR: null };
+      const { error } = await db.from(TABELA).update({ SOLICITADO: valor, ...registro(valor), ...extra }).eq('id', id);
+      if (error) aviso('Não foi possível atualizar: ' + error.message, true);
+      else aviso(valor ? 'Pedido marcado como solicitado.' : 'Pedido voltou para pendente.');
+      carregar();
+    }
+
+    async function definirPrazo(id, valor) {
+      const { error } = await db.from(TABELA).update({ PRAZO_HORAS: valor }).eq('id', id);
+      if (error) aviso('Não foi possível atualizar o prazo: ' + error.message, true);
+      carregar();
+    }
+
+    async function anexarDocumento(r, arq) {
+      if (!arq) return;
+      const limpo = arq.name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9._-]/g, '_');
+      const caminho = 'final/' + Date.now() + '_' + limpo;
+      aviso('Enviando documento...');
+      const envio = await db.storage.from(BUCKET).upload(caminho, arq);
+      if (envio.error) return aviso('Falha ao enviar o documento: ' + envio.error.message, true);
+      const { error } = await db.from(TABELA).update({ DOCUMENTO_FINAL: caminho }).eq('id', r.id);
+      if (error) {
+        await db.storage.from(BUCKET).remove([caminho]);
+        return aviso('Não foi possível salvar o documento: ' + error.message, true);
+      }
+      if (r.DOCUMENTO_FINAL) await db.storage.from(BUCKET).remove([r.DOCUMENTO_FINAL]);
+      aviso('Documento anexado.');
+      carregar();
+    }
+
+    async function baixar(caminho) {
+      const { data, error } = await db.storage.from(BUCKET).createSignedUrl(caminho, 60);
+      if (error) return aviso('Não foi possível abrir o arquivo: ' + error.message, true);
+      window.open(data.signedUrl, '_blank');
+    }
+
+    // Abas e seleção
+    function trocarAba(nome) {
+      estado.aba = nome;
+      $('#aba-hoje').setAttribute('aria-selected', nome === 'hoje');
+      $('#aba-entrega').setAttribute('aria-selected', nome === 'entrega');
+      $('#aba-final').setAttribute('aria-selected', nome === 'final');
+      $('#aba-todas').setAttribute('aria-selected', nome === 'todas');
+      desenhar();
+    }
+    $('#aba-hoje').addEventListener('click', () => trocarAba('hoje'));
+    $('#aba-entrega').addEventListener('click', () => trocarAba('entrega'));
+    $('#aba-final').addEventListener('click', () => trocarAba('final'));
+    $('#aba-todas').addEventListener('click', () => trocarAba('todas'));
+    const refiltrar = () => { estado.sel.clear(); desenhar(); };
+    $('#busca').addEventListener('input', refiltrar);
+    $('#f-agencia').addEventListener('change', refiltrar);
+    $('#f-emissor').addEventListener('change', refiltrar);
+    $('#sel-todos').addEventListener('change', (e) => {
+      listaAtual().filter((r) => !r.SOLICITADO).forEach((r) => (e.target.checked ? estado.sel.add(r.id) : estado.sel.delete(r.id)));
+      desenhar();
+    });
+
+    async function copiarTexto(texto, mensagem) {
+      try { await navigator.clipboard.writeText(texto); }
+      catch {
+        const t = document.createElement('textarea');
+        t.value = texto; document.body.append(t); t.select(); document.execCommand('copy'); t.remove();
+      }
+      aviso(mensagem);
+    }
+
+    // Texto para o WhatsApp
+    // Na mensagem a entrega sai sempre 1 hora antes do horário cadastrado
+    function entregaAntecipada(r) {
+      if (!r.HORA_DA_ENTREGA) return formatar(r.DATA_DA_ENTREGA);
+      const [a, mes, d] = r.DATA_DA_ENTREGA.split('-').map(Number);
+      const [hh, mm] = r.HORA_DA_ENTREGA.split(':').map(Number);
+      const t = new Date(a, mes - 1, d, hh - 1, mm);
+      const p2 = (n) => String(n).padStart(2, '0');
+      return p2(t.getDate()) + '/' + p2(t.getMonth() + 1) + '/' + t.getFullYear() + ' às ' + p2(t.getHours()) + ':' + p2(t.getMinutes());
+    }
+
+    function textoZap(rows) {
+      const blocos = rows.map((r) => [
+        '- *Entrega: ' + entregaAntecipada(r) + '*',
+        '- Data da volta: ' + formatar(r.DATA_DA_VOLTA),
+        '- Trecho: ' + r.TRECHO,
+        r.PRAZO_HORAS ? '- Tipo: ' + r.PRAZO_HORAS + 'h' : null
+      ].filter(Boolean).join('\n'));
+      const texto = 'Solicitação de volta:\n\n' + blocos.join('\n\n');
+      const pax = rows.length === 1 ? estado.pax[rows[0].id] || [] : [];
+      const blocosPax = pax.map((p, i) => [
+        'Passageiro ' + (i + 1),
+        'Nome: ' + p.nome,
+        p.cpf ? 'CPF: ' + formatarCpf(p.cpf) : null,
+        p.data_nascimento ? 'Nascimento: ' + formatar(p.data_nascimento) : null
+      ].filter(Boolean).join('\n'));
+      return blocosPax.length ? texto + '\n\n' + blocosPax.join('\n\n') : texto;
+    }
+    $('#btn-zap').addEventListener('click', () => {
+      const rows = estado.linhas.filter((r) => estado.sel.has(r.id));
+      $('#zap-texto').value = textoZap(rows);
+      $('#zap-erro').textContent = '';
+      $('#dlg-zap').showModal();
+    });
+    $('#zap-fechar').addEventListener('click', () => $('#dlg-zap').close());
+    $('#zap-copiar').addEventListener('click', async () => {
+      const campo = $('#zap-texto');
+      try { await navigator.clipboard.writeText(campo.value); }
+      catch { campo.select(); document.execCommand('copy'); }
+      const b = $('#zap-copiar');
+      b.textContent = 'Copiado!';
+      setTimeout(() => (b.textContent = 'Copiar texto'), 1800);
+    });
+    $('#zap-marcar').addEventListener('click', async () => {
+      const ids = [...estado.sel];
+      const { error } = await db.from(TABELA).update({ SOLICITADO: true, ...registro(true) }).in('id', ids);
+      if (error) { $('#zap-erro').textContent = 'Não foi possível marcar: ' + error.message; return; }
+      estado.sel.clear();
+      $('#dlg-zap').close();
+      aviso('Pedidos marcados como solicitados.');
+      carregar();
+    });
+
+    // Novo pedido e edição (mesmo formulário)
+    const dlg = $('#dlg-novo');
+    const form = $('#form-novo');
+    const rotuloSalvar = () => (estado.editando ? 'Salvar alterações' : 'Salvar pedido');
+
+    function lerPax() {
+      return [...document.querySelectorAll('#lista-pax .pax-linha')].map((l) => ({
+        nome: l.querySelector('.pax-nome').value.trim(),
+        cpf: l.querySelector('.pax-cpf').value.replace(/\D/g, ''),
+        data_nascimento: l.querySelector('.pax-nasc').value
+      })).filter((p) => p.nome || p.cpf || p.data_nascimento);
+    }
+
+    function sincronizarQtd() {
+      const n = lerPax().filter((p) => p.nome).length;
+      if (n) form.qtd.value = n;
+    }
+
+    function linhaPax(p = {}) {
+      const nome = criar('input', { class: 'pax-nome', placeholder: 'Nome completo', 'aria-label': 'Nome do passageiro' });
+      nome.value = p.nome || '';
+      const cpf = criar('input', { class: 'pax-cpf', placeholder: 'CPF', inputmode: 'numeric', maxlength: '14', 'aria-label': 'CPF do passageiro' });
+      cpf.value = p.cpf ? formatarCpf(p.cpf) : '';
+      const nasc = criar('input', { class: 'pax-nasc', type: 'date', 'aria-label': 'Data de nascimento do passageiro' });
+      nasc.value = p.data_nascimento || '';
+      const remover = criar('button', { class: 'link', type: 'button', title: 'Remover passageiro', 'aria-label': 'Remover passageiro' }, '✕');
+
+      nome.addEventListener('input', sincronizarQtd);
+      cpf.addEventListener('input', () => { cpf.value = formatarCpf(cpf.value); cpf.classList.remove('invalido'); });
+      cpf.addEventListener('blur', () => cpf.classList.toggle('invalido', !!cpf.value && !cpfValido(cpf.value)));
+      remover.addEventListener('click', () => {
+        linha.remove();
+        if (!$('#lista-pax').children.length) $('#lista-pax').append(linhaPax());
+        sincronizarQtd();
+      });
+      const linha = criar('div', { class: 'pax-linha' }, nome, cpf, nasc, remover);
+      return linha;
+    }
+
+    function renderPax(lista) {
+      $('#lista-pax').replaceChildren(...(lista.length ? lista : [{}]).map((p) => linhaPax(p)));
+    }
+    $('#btn-add-pax').addEventListener('click', () => {
+      const nova = linhaPax();
+      $('#lista-pax').append(nova);
+      nova.querySelector('.pax-nome').focus();
+    });
+
+    function abrirForm(r) {
+      estado.editando = r || null;
+      form.reset();
+      $('#titulo-form').textContent = r ? 'Editar pedido' : 'Novo pedido de volta';
+      preencherAgencias(r && r.AGENCIA ? r.AGENCIA.trim().toUpperCase() : '');
+      form.cliente.value = r ? r.NOME_CLIENTE || '' : '';
+      form.trecho.value = r ? r.TRECHO || '' : '';
+      form.solicitacao.value = r ? r.DATA_DA_SOLICITACAO || hoje() : hoje();
+      form.volta.value = r ? r.DATA_DA_VOLTA || '' : '';
+      form.entrega.value = r ? r.DATA_DA_ENTREGA || '' : '';
+      form.prazo24.checked = !!r && r.PRAZO_HORAS === 24;
+      form.prazo48.checked = !!r && r.PRAZO_HORAS === 48;
+      form.hora.value = r && r.HORA_DA_ENTREGA ? r.HORA_DA_ENTREGA.slice(0, 5) : '';
+      form.qtd.value = r ? r.QTD_PASSAGEIROS || 1 : 1;
+      renderPax(r ? estado.pax[r.id] || [] : []);
+      $('#btn-excluir').hidden = !r;
+      $('#lista-arquivos').replaceChildren(...(r ? arquivosDe(r) : []).map((c) =>
+        criar('label', { class: 'prazo' }, criar('input', { type: 'checkbox', name: 'remover', value: c }), 'Remover ' + c.replace(/^\d+_/, ''))));
+      const n = r ? arquivosDe(r).length : 0;
+      $('#dica-arquivos').textContent = n
+        ? 'Este pedido já tem ' + n + ' arquivo(s). Os novos serão adicionados a eles.'
+        : 'Pode escolher mais de um arquivo, um por passageiro.';
+      $('#doc-atual').replaceChildren(...(r && r.DOCUMENTO_FINAL ? [
+        criar('label', { class: 'prazo' }, criar('input', { type: 'checkbox', name: 'remover-doc' }),
+          'Remover o documento atual (' + r.DOCUMENTO_FINAL.replace(/^final\/\d+_/, '') + ')')
+      ] : []));
+      $('#btn-salvar').textContent = rotuloSalvar();
+      $('#erro-novo').textContent = '';
+      dlg.showModal();
+    }
+    $('#btn-novo').addEventListener('click', () => abrirForm(null));
+    $('#btn-cancelar').addEventListener('click', () => dlg.close());
+    $('#n-agencia').addEventListener('change', (e) => {
+      if (e.target.value !== '__nova__') return;
+      const nome = (prompt('Nome da nova agência:') || '').trim().toUpperCase();
+      if (nome && !estado.agencias.includes(nome)) { estado.agencias.push(nome); estado.agencias.sort(); }
+      preencherAgencias(nome);
+    });
+    $('#btn-excluir').addEventListener('click', async () => {
+      const r = estado.editando;
+      if (!r || !confirm('Excluir o pedido de ' + r.NOME_CLIENTE + '? Isso não pode ser desfeito.')) return;
+      const { data, error } = await db.from(TABELA).delete().eq('id', r.id).select();
+      if (error) { $('#erro-novo').textContent = 'Não foi possível excluir: ' + error.message; return; }
+      if (!data || !data.length) { $('#erro-novo').textContent = 'Sem permissão para excluir. Falta rodar o SQL da regra de exclusão no Supabase.'; return; }
+      const arquivosDoPedido = [...arquivosDe(r), ...(r.DOCUMENTO_FINAL ? [r.DOCUMENTO_FINAL] : [])];
+      if (arquivosDoPedido.length) await db.storage.from(BUCKET).remove(arquivosDoPedido);
+      dlg.close();
+      aviso('Pedido excluído.');
+      carregar();
+    });
+    form.prazo24.addEventListener('change', () => { if (form.prazo24.checked) form.prazo48.checked = false; });
+    form.prazo48.addEventListener('change', () => { if (form.prazo48.checked) form.prazo24.checked = false; });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const salvar = $('#btn-salvar');
+      const erro = $('#erro-novo');
+      erro.textContent = '';
+
+      const duplicado = estado.linhas.find((r) =>
+        (!estado.editando || r.id !== estado.editando.id) &&
+        semAcento(r.NOME_CLIENTE).trim() === semAcento(form.cliente.value).trim() &&
+        r.DATA_DA_ENTREGA === form.entrega.value);
+      if (duplicado && !confirm(
+        'Já existe um pedido de ' + duplicado.NOME_CLIENTE + ' pela agência ' + duplicado.AGENCIA +
+        ' com entrega em ' + formatar(duplicado.DATA_DA_ENTREGA) + '. Quer salvar mesmo assim?'
+      )) return;
+
+      const pax = lerPax();
+      if (pax.some((p) => !p.nome)) { erro.textContent = 'Informe o nome de todos os passageiros preenchidos.'; return; }
+      const cpfRuim = pax.find((p) => p.cpf && !cpfValido(p.cpf));
+      if (cpfRuim) { erro.textContent = 'CPF inválido para ' + cpfRuim.nome + '. Confira os números.'; return; }
+      if (pax.length && !estado.paxOk) {
+        erro.textContent = 'Os passageiros não estão disponíveis agora. Confira se a tabela "passageiros" foi criada no Supabase.';
+        return;
+      }
+
+      const saiDoPedido = [...form.querySelectorAll('input[name="remover"]:checked')].map((c) => c.value);
+      const arquivosFicam = (estado.editando ? arquivosDe(estado.editando) : []).filter((c) => !saiDoPedido.includes(c)).length
+        + form.passaportes.files.length;
+      if (!arquivosFicam && !pax.length && !confirm(
+        'Este pedido não tem passaporte em arquivo nem passageiros informados. Quer salvar mesmo assim?'
+      )) return;
+
+      salvar.disabled = true;
+      salvar.textContent = 'Salvando...';
+
+      const enviados = [];
+      try {
+        for (const arq of form.passaportes.files) {
+          const limpo = arq.name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9._-]/g, '_');
+          const caminho = Date.now() + '_' + limpo;
+          const { error } = await db.storage.from(BUCKET).upload(caminho, arq);
+          if (error) throw new Error('Falha ao enviar ' + arq.name + ': ' + error.message);
+          enviados.push(caminho);
+        }
+
+        // Documento final (um arquivo por pedido, na pasta final/ do mesmo bucket)
+        let docNovo = null;
+        const arqDoc = form.doc.files[0];
+        if (arqDoc) {
+          const limpoDoc = arqDoc.name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9._-]/g, '_');
+          docNovo = 'final/' + Date.now() + '_' + limpoDoc;
+          const { error: erroDoc } = await db.storage.from(BUCKET).upload(docNovo, arqDoc);
+          if (erroDoc) throw new Error('Falha ao enviar ' + arqDoc.name + ': ' + erroDoc.message);
+          enviados.push(docNovo);
+        }
+        const docAtual = estado.editando ? estado.editando.DOCUMENTO_FINAL || null : null;
+        const tirarDoc = !!form.querySelector('input[name="remover-doc"]:checked');
+        const docFinal = docNovo || (tirarDoc ? null : docAtual);
+
+        const removidos = [...form.querySelectorAll('input[name="remover"]:checked')].map((c) => c.value);
+        const todos = [...(estado.editando ? arquivosDe(estado.editando) : []).filter((c) => !removidos.includes(c)), ...enviados];
+        const campos = {
+          AGENCIA: form.agencia.value.trim(),
+          NOME_CLIENTE: form.cliente.value.trim(),
+          TRECHO: form.trecho.value.trim(),
+          DATA_DA_SOLICITACAO: form.solicitacao.value,
+          DATA_DA_VOLTA: form.volta.value,
+          DATA_DA_ENTREGA: form.entrega.value,
+          HORA_DA_ENTREGA: form.hora.value || null,
+          QTD_PASSAGEIROS: parseInt(form.qtd.value, 10) || 1,
+          ARMAZENAGEM_PASSAPORTE: todos.length ? todos.join('|') : null,
+          DOCUMENTO_FINAL: docFinal,
+          PRAZO_HORAS: form.prazo24.checked ? 24 : form.prazo48.checked ? 48 : null
+        };
+
+        const { data: salvo, error } = estado.editando
+          ? await db.from(TABELA).update(campos).eq('id', estado.editando.id)
+          : await db.from(TABELA).insert({ ...campos, SOLICITADO: false }).select('id').single();
+        if (error) throw new Error('Falha ao salvar o pedido: ' + error.message);
+        if (removidos.length) await db.storage.from(BUCKET).remove(removidos);
+        if (docAtual && docAtual !== docFinal) await db.storage.from(BUCKET).remove([docAtual]);
+
+        // Passageiros: troca a lista do pedido pela que está na tela
+        let falhaPax = '';
+        if (estado.paxOk) {
+          const pedidoId = estado.editando ? estado.editando.id : salvo.id;
+          const apagou = await db.from('passageiros').delete().eq('pedido_id', pedidoId);
+          let erroPax = apagou.error;
+          if (!erroPax && pax.length) {
+            const gravou = await db.from('passageiros').insert(pax.map((p) => ({
+              pedido_id: pedidoId, nome: p.nome, cpf: p.cpf || null, data_nascimento: p.data_nascimento || null
+            })));
+            erroPax = gravou.error;
+          }
+          if (erroPax) falhaPax = erroPax.message;
+        }
+
+        dlg.close();
+        if (falhaPax) aviso('Pedido salvo, mas os passageiros não foram salvos: ' + falhaPax + '. Abra Editar para tentar de novo.', true);
+        else aviso(estado.editando ? 'Pedido atualizado.' : 'Pedido cadastrado.');
+        carregar();
+      } catch (err) {
+        if (enviados.length) await db.storage.from(BUCKET).remove(enviados);
+        erro.textContent = err.message;
+      } finally {
+        salvar.disabled = false;
+        salvar.textContent = rotuloSalvar();
+      }
+    });
+
+    // Login e sessão
+    $('#form-login').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const f = e.target;
+      $('#erro-login').textContent = '';
+      const { error } = await db.auth.signInWithPassword({ email: f.email.value, password: f.senha.value });
+      if (error) {
+        const m = error.message || '';
+        $('#erro-login').textContent =
+          m.includes('Invalid login credentials') ? 'E-mail ou senha incorretos.' :
+          m.includes('not confirmed') ? 'Usuário não confirmado. No Supabase, abra o usuário e confirme o e-mail.' :
+          'Erro: ' + m;
+      }
+    });
+    $('#btn-sair').addEventListener('click', async () => {
+      try { await db.auth.signOut({ scope: 'local' }); } catch (e) { /* segue e limpa mesmo assim */ }
+      Object.keys(localStorage).filter((k) => k.startsWith('sb-')).forEach((k) => localStorage.removeItem(k));
+      location.reload();
+    });
+
+    db.auth.onAuthStateChange((_evento, sessao) => {
+      estado.usuario = sessao ? (sessao.user.email || '').split('@')[0] : '';
+      $('#login').hidden = !!sessao;
+      $('#app').hidden = !sessao;
+      if (sessao) setTimeout(carregar, 0);
+    });
+  }
+</script>
+</body>
+</html>
